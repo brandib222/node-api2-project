@@ -121,7 +121,9 @@ router.put('/:id', (req, res) => {
                 return Post.findById(req.params.id)
             }
         }) .then(post => {
-            res.json(post)
+            if(post) {
+                res.json(post)
+            }
         })
         .catch(err => {
             res.status(500).json({
@@ -133,6 +135,23 @@ router.put('/:id', (req, res) => {
     }
 
 })
-router.get('/:id/messages', (req, res) => {
-
+router.get('/:id/messages', async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id)
+        if(!post) {
+            res.status(404).json({
+                message: 'The post with the specified ID does not exist'
+            })
+        } else {
+            const messages = await Post.findPostComments(req.params.id)
+            // console.log(stuff)
+            res.json(messages)
+        }
+    } catch(err) {
+        res.status(500).json({
+            message: 'The messages information could not be retrieved',
+            err: err.message,
+            stack: err.stack
+        })
+    }
 })
